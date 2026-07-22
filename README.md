@@ -1,62 +1,70 @@
+<div align="center">
+
 # Log Tail Viewer
 
-A real-time log tail viewer for debugging Dropwizard / slf4j server logs. Connect to remote hosts via SSH (with optional jump server / bastion support), or drag-and-drop local log files. Multiple browser tabs can connect to independent log sources simultaneously.
+A real-time, browser-based log tail viewer. Connect to remote hosts via SSH (with optional jump server), or drop in local log files. Multi-tab support lets you watch multiple sources in parallel.
 
-## Features
+![Status](https://img.shields.io/badge/status-active-success)
+![Node](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Tailwind](https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-### Multi-Source / Multi-Tab
-- Open multiple browser tabs, each connected to a **different log source** — different SSH hosts, different files, all streaming in parallel
-- Each tab gets its own `?source=xxx` URL param, so **refresh persists** per-tab
-- Sources are fully independent — separate log files, separate SSE streams, separate filters
-- "+ New Tab" button in the header opens a fresh start screen
+</div>
 
-### SSH Tail with Jump Server Support
-- Connect to any remote host: `user@hostname` + `/path/to/logs/*.log`
-- **Jump server (bastion)** support via SSH `-J` flag — works with `~/.ssh/config` aliases (e.g. `pgjump`)
-- SSH key at `~/.ssh/id_ed25519` is used automatically with `IdentitiesOnly=yes`
-- SSH connection validation: polls for connection status, captures common errors (hostname resolution, permission denied, timeout, host key verification), cancel button during connecting
-- `StrictHostKeyChecking=accept-new` for first-connect convenience
+---
 
-### Local File & Upload
-- Drag-and-drop `.log`, `.txt`, `.jsonl` files onto the start screen
-- Empty file detection — rejects files with no parseable log lines
-- File contents are parsed and indexed server-side for search/backfill
+## ✨ Features
 
-### Log Parsing
-- **Dropwizard / slf4j format**: `LEVEL [date] traceId [thread] [logger]: message`
-- **JSON logs**: extracts `timestamp`, `level`, and all fields automatically
-- **Common text format**: `2024-01-01T12:00:00.000Z [ERROR] message`
-- **Logfmt**: `key=value` pairs parsed into structured fields
-- Fallback: raw line passed through as-is
+| Feature | What it does |
+|---------|-------------|
+| **Multi-Tab / Multi-Source** | Open multiple browser tabs, each connected to a different log source — independent SSH hosts, files, and filters, all streaming in parallel |
+| **SSH Tail + Jump Server** | Connect to `user@host` and tail remote logs. Optional jump server (bastion) via `-J` flag — works with `~/.ssh/config` aliases |
+| **File Upload** | Drag-and-drop `.log`, `.txt`, `.jsonl` files. Parsed and indexed server-side instantly |
+| **Multi-Format Parsing** | Dropwizard/slf4j, JSON, common text, logfmt — with raw fallback. Structured fields extracted automatically |
+| **Virtualized Rendering** | `react-virtuoso` with dynamic row heights. Handles thousands of lines with smooth scrolling |
+| **Real-Time Streaming** | SSE streaming with 100ms batch intervals. Backfill on connect and on scroll-up |
+| **Live Filters** | Toggle log levels (with row tinting), text/regex search with highlighting, and exclude filter |
+| **Pause / Resume** | Pause the stream without losing data. Buffered lines flush on resume. Auto-tail when at bottom |
+| **Refresh Persistence** | Each tab stores its source in the URL — refresh reconnects automatically |
 
-### Virtualized Rendering
-- Powered by `react-virtuoso` with dynamic row heights (messages can span multiple lines)
-- 2-line card layout: metadata row (line number, level badge, timestamp, trace ID, thread, logger) + message row
-- Handles large log volumes (8000-line window with backfill on scroll-up)
+---
 
-### Streaming & Backfill
-- **SSE (Server-Sent Events)** for real-time streaming with 100ms batch interval
-- On connect, backfills the last 200 lines from buffer or file
-- **Scroll-up backfill**: loads 500 older lines when reaching the top of the viewport
-- Line index (every 100th line) for fast offset-based seek
+## 🚀 Quick Start
 
-### Filters
-- **Level badges**: click to toggle DEBUG / INFO / WARN / ERROR / TRACE — rows tinted by level (ERROR = red background, WARN = amber background)
-- **Text search**: case-insensitive, highlights matches across all fields (raw line, message, traceId, thread, logger)
-- **Regex search**: toggle regex mode for advanced pattern matching
-- **Exclude filter**: hide lines containing specific text
+### Prerequisites
 
-### Pause / Resume
-- Pause incoming log lines without losing them — buffered and flushed on resume
-- "↓ Live" button to jump back to the bottom and resume following
-- Auto-tail: new lines auto-scroll to bottom when already at the bottom
+- **Node.js** 18+
+- **SSH key** at `~/.ssh/id_ed25519` (for SSH tail)
+- **SSH config** entries for jump server aliases (if using bastion hosts)
 
-### Source Management
-- Source state persists server-side — browser refresh reconnects to the same source
-- Disconnect button cleanly stops the SSH process and cleans up files
-- `GET /api/sources` lists all active sources across tabs
+### One-Command Start
 
-## Architecture
+```bash
+npm install
+npm run dev:all
+```
+
+This starts both the API server (port 3201) and the frontend (port 3200) in a single terminal.
+
+Open http://localhost:3200
+
+> **Separate terminals?**
+> ```bash
+> npm run server   # port 3201
+> npm run dev      # port 3200
+> ```
+
+### Sample Log Generators
+
+```bash
+./sample-logs.sh                          # generate a static sample log file
+./live-logs.sh /path/to/output.log       # continuously append live logs
+```
+
+---
+
+## 🏗️ Architecture
 
 ```
 ┌─────────────────────┐     SSE      ┌──────────────────────┐
@@ -73,44 +81,36 @@ A real-time log tail viewer for debugging Dropwizard / slf4j server logs. Connec
                                      └──────────────────────┘
 ```
 
-**Frontend**: Next.js 16 + React 19 + TailwindCSS 4 + react-virtuoso
-**Backend**: Node.js HTTP server (no framework) with SSE streaming
+### Tech Stack
 
-## Getting Started
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 16, React 19, TailwindCSS 4 |
+| Rendering | react-virtuoso (dynamic height virtualization) |
+| Backend | Node.js HTTP server (no framework) |
+| Streaming | SSE (Server-Sent Events) |
+| SSH | Native `ssh` with key-based auth |
 
-### Prerequisites
-- Node.js 18+
-- SSH key at `~/.ssh/id_ed25519` (for SSH tail feature)
-- SSH config entries for jump server aliases (if using bastion hosts)
+---
 
-### Install & Run
+## 📋 Log Formats
 
-```bash
-# Install dependencies
-npm install
+| Format | Example |
+|--------|---------|
+| **Dropwizard / slf4j** | `INFO [2024-01-01T12:00:00.000Z] trace-abc [main] [com.app.Service]: Started` |
+| **JSON** | `{"timestamp":"2024-01-01T12:00:00Z","level":"ERROR","message":"..."}` |
+| **Common text** | `2024-01-01T12:00:00.000Z [ERROR] Something went wrong` |
+| **Logfmt** | `level=error msg="disk full" component=storage` |
+| **Raw fallback** | Any unparseable line is displayed as-is |
 
-# Start the API server (port 3201)
-npm run server
+---
 
-# In another terminal, start the frontend (port 3200)
-npm run dev
-```
-
-Open http://localhost:3200
-
-### Sample Log Generators
-
-```bash
-# Generate a static sample log file
-./sample-logs.sh
-
-# Continuously append live logs to any path
-./live-logs.sh /path/to/output.log
-```
-
-## API Endpoints
+## 📡 API Reference
 
 All data endpoints require `?sourceId=xxx`.
+
+<details>
+<summary><b>Click to expand full API reference</b></summary>
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -125,3 +125,25 @@ All data endpoints require `?sourceId=xxx`.
 | POST | `/api/source/file` | Use local file (body: `{filePath}`) |
 | POST | `/api/source/upload?filename=foo.log` | Upload file content as source |
 | GET | `/api/health` | Health check |
+
+</details>
+
+---
+
+## 🔧 Log Format Parsers
+
+The server automatically detects and parses multiple log formats. Parsed fields (timestamp, level, traceId, thread, logger) are extracted into structured data for filtering and display.
+
+- **Dropwizard / slf4j**: `LEVEL [date] traceId [thread] [logger]: message`
+- **JSON**: extracts `timestamp`, `level`, and all fields
+- **Common text**: timestamp + optional `[LEVEL]` + message
+- **Logfmt**: `key=value` pairs parsed into structured fields
+- **Raw fallback**: any unparseable line passes through as-is
+
+---
+
+<div align="center">
+
+Made with ⚡ by [me-bhavya](https://github.com/me-bhavya)
+
+</div>
