@@ -441,14 +441,11 @@ class SourceSession {
     this.tailer = new LogTailer(this.logFile, this.indexFile);
 
     const cmd = `tail -F ${logPath}`;
-    const homeDir = process.env.HOME || require("os").homedir();
     const sshOpts = [
       "-A",
-      "-i", path.join(homeDir, ".ssh", "id_ed25519"),
       "-o", "ServerAliveInterval=30",
       "-o", "ServerAliveCountMax=3",
       "-o", "StrictHostKeyChecking=accept-new",
-      "-o", "IdentitiesOnly=yes",
     ];
     if (jumpServer) {
       sshOpts.push("-J", jumpServer);
