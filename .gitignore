@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# logs
+logs/
+*.log
+*.log.idx
+
+# misc
+.DS_Store
+*.pem
+.env
+
+# typescript
+next-env.d.ts
