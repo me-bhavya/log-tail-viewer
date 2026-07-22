@@ -443,6 +443,7 @@ class SourceSession {
     const cmd = `tail -F ${logPath}`;
     const homeDir = process.env.HOME || require("os").homedir();
     const sshOpts = [
+      "-A",
       "-i", path.join(homeDir, ".ssh", "id_ed25519"),
       "-o", "ServerAliveInterval=30",
       "-o", "ServerAliveCountMax=3",
